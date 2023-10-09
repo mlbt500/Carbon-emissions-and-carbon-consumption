@@ -1,27 +1,21 @@
-# CO2 Consumption
-consumption <- read.csv("consumption-co2-emissions.csv")
-ncol(consumption)
+emissions <- read.csv("co2-emissions-and-gdp.csv")
+emissions <- emissions[,c(1:3, 5)]
 peers <- countries <- c(
   "Australia", "Switzerland", "Finland", "France", "United Kingdom",
   "Ireland", "Netherlands", "United States", "Spain", "Italy", "Norway", "New Zealand", 
   "Sweden", "Norway", "Austria", "Germany"
 )
+emissions2 <- emissions[emissions$Entity %in% peers,]
 
-consumption2 <- consumption[consumption$Entity %in% peers,]
-consumption2
-
-unique(peers)
-unique(consumption2$Entity)
-
-# Normalizing the data
+# Normalize the data
 normalize_function <- function(df) {
   df$normalized_emission <- ifelse(df$Year == 1990, 1, 
-                                   df$Annual.consumption.based.CO..emissions / 
-                                     df$Annual.consumption.based.CO..emissions[df$Year == 1990])
+                                   df$Annual.CO..emissions / 
+                                     df$Annual.CO..emissions[df$Year == 1990])
   return(df)
 }
 
-normalized_data <- split(consumption2, consumption2$Entity)
+normalized_data <- split(emissions2, emissions2$Entity)
 normalized_data <- lapply(normalized_data, normalize_function)
 normalized_data <- do.call(rbind, normalized_data)
 
@@ -34,7 +28,7 @@ plot(0, 0,
      ylim = ylim_values,
      xlab = "",
      ylab = "Normalised CO2 Emissions", 
-     main = "Annual CO2 Consumption/1990 values")
+     main = "Annual CO2 Emissions/1990 values")
 
 for (country in unique(normalized_data$Entity)) {
   country_data <- normalized_data[normalized_data$Entity == country, ]
@@ -45,13 +39,13 @@ for (country in unique(normalized_data$Entity)) {
   }
 }
 
-mtext("*Australia, Switzerland, Finland, France, United Kingdom,
-  Ireland, Netherlands, United States, Spain, Italy, Norway, New Zealand, 
-  Sweden, Norway, Austria, Germany",  side = 1, line = 4, cex = 0.7, adj = 0)
+mtext("*Australia, Switzerland, Finland, France, United Kingdom, Ireland, Netherlands, 
+United States, Spain, Italy, Norway, New Zealand, Sweden, Norway, Austria, Germany
+**Our World in Data",  side = 1, line = 4, cex = 0.7, adj = 0)
 
 legend("topright", 
        legend = c("United Kingdom"), 
        col = c("red"), 
        lwd = 2, 
        bty = "n", 
-       cex = 0.8)
+       cex = 1)
